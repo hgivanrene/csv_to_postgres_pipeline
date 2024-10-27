@@ -1,0 +1,115 @@
+/*1.Inserte un nuevo empleado en la tabla "empleados" con los siguientes datos: ID
+6, nombre "Elena", apellido "López", fecha de contratación "2023-05-01", salario
+33000.00, departamento 3.*/
+
+INSERT INTO POSTGRES.CELERIX.EMPLEADOS (
+ID_EMPLEADO
+, NOMBRE
+, APELLIDO
+, FECHA_CONTRATACION
+, SALARIO
+, ID_DEPARTAMENTO
+)
+VALUES (6, 'Elena', 'López', '2023-05-01', 33000.00, 3)
+;
+
+/*2. Actualice el salario del empleado con ID 2 a 37000.00.*/
+
+UPDATE POSTGRES.CELERIX.EMPLEADOS
+SET SALARIO = 37000.00
+WHERE ID_EMPLEADO = 2
+;
+
+/*3. Implemente un trigger que actualice automáticamente el stock de un producto 
+cuando se realiza un nuevo pedido.*/
+
+CREATE OR REPLACE FUNCTION POSTGRES.CELERIX.UPDATE_STOCK_FUNCTION()
+RETURNS TRIGGER AS $$
+BEGIN
+    UPDATE POSTGRES.CELERIX.PRODUCTOS
+    SET STOCK = STOCK - NEW.cantidad
+    WHERE ID_PRODUCTO = NEW.id_producto;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql
+;
+
+CREATE OR REPLACE TRIGGER UPDATE_STOCK_TRIGGER
+AFTER INSERT ON POSTGRES.CELERIX.DETALLE_PEDIDOS
+FOR EACH ROW
+EXECUTE FUNCTION POSTGRES.CELERIX.UPDATE_STOCK_FUNCTION()
+;
+
+INSERT INTO POSTGRES.CELERIX.DETALLE_PEDIDOS (
+	ID_DETALLE
+	, ID_PEDIDO
+	, ID_PRODUCTO
+	, CANTIDAD
+	, PRECIO_UNITARIO
+)
+VALUES (9, 5, 3, 5, 300),
+	   (10, 5, 4, 2, 250)
+;
+
+INSERT INTO POSTGRES.CELERIX.PEDIDOS (
+	ID_PEDIDO
+	, ID_CLIENTE
+	, FECHA_PEDIDO
+	, TOTAL
+)
+SELECT ID_PEDIDO
+	   , 4 AS ID_CLIENTE
+	   , CURRENT_DATE AS FECHA_PEDIDO
+	   , SUM(CANTIDAD*PRECIO_UNITARIO) AS TOTAL
+FROM POSTGRES.CELERIX.DETALLE_PEDIDOS
+WHERE 1=1
+AND ID_PEDIDO = (SELECT MAX(ID_PEDIDO) FROM POSTGRES.CELERIX.DETALLE_PEDIDOS)
+GROUP BY 1,2,3
+;
+
+/*4. Haz una consulta que muestre el nombre del producto, stock, la cantidad de
+veces que ha sido pedido, la cantidad de veces que ha sido vendido, la fecha del
+último pedido para cada producto y el total de ingresos generados por ese
+producto.
+agrega un filtro que me muestre solo lso productos que han tenido mas de un
+pedido*/
+
+SELECT P.NOMBRE_PRODUCTO
+	   , P.STOCK
+	   , PP.PEDIDO
+	   , PP.COMPRADO
+	   , PPP.FECHA_PEDIDO AS LAST_DATE_PEDIDO_PRODUCTO
+	   , PP.TOTAL_INGRESOS_PRODUCTO
+FROM POSTGRES.CELERIX.PRODUCTOS AS P
+LEFT JOIN (
+			SELECT ID_PRODUCTO
+				   , SUM(CANTIDAD) AS COMPRADO
+				   , COUNT(ID_PEDIDO) AS PEDIDO
+				   , MAX(ID_PEDIDO) AS LAST_ID_PEDIDO
+				   , SUM(CANTIDAD*PRECIO_UNITARIO) AS TOTAL_INGRESOS_PRODUCTO
+			FROM POSTGRES.CELERIX.DETALLE_PEDIDOS
+			GROUP BY 1
+		  ) AS PP
+	ON P.ID_PRODUCTO = PP.ID_PRODUCTO
+LEFT JOIN POSTGRES.CELERIX.PEDIDOS AS PPP
+	ON PP.LAST_ID_PEDIDO = PPP.ID_PEDIDO
+WHERE 1=1
+AND PEDIDO > 1
+
+/*5. Diseñe los índices apropiados para mejorar el rendimiento de consultas
+frecuentes en la tabla "pedidos".*/
+
+CREATE INDEX idx_fecha_pedido ON POSTGRES.CELERIX.PEDIDOS (FECHA_PEDIDO);
+
+/*6. Escriba una consulta que utilice una ventana deslizante (window function) para
+calcular el salario acumulado por departamento.*/
+
+SELECT DISTINCT D.ID_DEPARTAMENTO
+	   , D.NOMBRE_DEPARTAMENTO
+	   , COALESCE(SUM(E.SALARIO) OVER(PARTITION BY D.ID_DEPARTAMENTO), 0) AS SALARIO_POR_DEPARTAMENTO
+FROM POSTGRES.CELERIX.DEPARTAMENTOS AS D
+LEFT JOIN POSTGRES.CELERIX.EMPLEADOS AS E
+	ON D.ID_DEPARTAMENTO = E.ID_DEPARTAMENTO
+ORDER BY 1 ASC
+;
