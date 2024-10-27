@@ -8,7 +8,7 @@ services: # Defines the services to be executed in containers.
     volumes: # Configures volumes to persist PostgreSQL data outside the container.
       - db_data:/var/lib/postgresql/data # Mount the db_data volume in the PostgreSQL data directory, preserving the data on restarts.
     ports: # Map ports between container and host to allow external connections.
-      - “5432:5432” # Map PostgreSQL port 5432 in the container to port 5432 on the host.
+      - "5432:5432" # Map PostgreSQL port 5432 in the container to port 5432 on the host.
 
   etl: # Service name for the Python ETL application.
     build: # Configuration to build the Docker image from a Dockerfile.
@@ -19,7 +19,7 @@ services: # Defines the services to be executed in containers.
       USERNAME: ${USERNAME} # Database user
       PASSWORD: ${PASSWORD} # Password of the superuser
       HOST: ${HOST}
-      PORT: “5432”
+      PORT: "5432"
 
     depends_on: # Defines that the 'etl' service depends on the 'db' service being running.
       - db # Indicates that the PostgreSQL container must be running before starting the ETL service.
