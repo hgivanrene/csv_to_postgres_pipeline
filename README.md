@@ -1,4 +1,4 @@
-# csv_to_postgres_pipeline
+# CSV to postgreSQL pipeline
 
 ## Description
 This repository is for developing a pipeline to create an ETL from CSV to PostgreSQL with Python.
@@ -33,7 +33,7 @@ To install homebrew we must open the terminal application that comes by default 
 At the end of running the command it will ask you to run the following two commands which are to add the homebrew to your PATH:
 
 * (echo; echo 'eval “$(/opt/homebrew/bin/brew shellenv)”') >> /Users/<user_name>/.zprofile.
-    * Note: The <user_name> must be changed to the username assigned on your machine.
+    * **Note:** The <user_name> must be changed to the username assigned on your machine.
 
 * eval “$(/opt/homebrew/bin/brew shellenv)”
 
