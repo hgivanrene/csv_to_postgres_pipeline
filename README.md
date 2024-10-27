@@ -3,6 +3,14 @@ This repository is for developing a pipeline to create an ETL from CSV to Postgr
 
 The purpose of this challenge is to develop a Python script that reads a CSV file and loads the data into a postgreSQL database. Docker Compose is used to orchestrate the SQL database containers and its ETL Python application.
 
+To solve the challenge I decided to create a function in the file main.py that is in charge of:
+    1. Define the variables for database connection settings.
+    2. Define the variables of CSV file name, schema name and table name in the database.
+    3. Create the connection to the database using SQLAlchemy and the database connection settings that I before define.
+    4. Create DDL of the table that will receive the data from the csv.
+    5. Read CSV file with pandas and keep it in a variable (data).
+    6. Finally, Load data into the postgresql table.
+
 # Repo clonning
 * git clone git@github.com:hgivanrene/csv_to_postgres_pipeline.git # This command is when you have your ssh key configured in the repo. This option is quite more safe.
 * git clone https://github.com/hgivanrene/csv_to_postgres_pipeline.git # This option is to clone the repo using the web URL.
@@ -46,14 +54,17 @@ To stop colima we do it in the following way:
 # Usage with Docker-compose
 
 Create the image for the DB and Python script on your local machine.
-    -docker-compose up --build -d
-    # We use the flag -d to execute the data base image in the Background.
+    * docker-compose up --build -d
+    *  We use the flag -d to execute the data base image in the Background.
 
 Once your image is completely up yo can check the logs of the python container to review the correctly execution of the main.py file.
-    # Use this command to know your container_id or container_name
-    - docker ps -a
+    * Use this command to know your container_id or container_name
+    * docker ps -a
 
-    # Use this command to check the logs of your container
-    - docker logs <container_name>
+    * Use this command to check the logs of your container
+    * docker logs <container_name>
 
 After this you will see the message of successful extraction and loading of data from your csv.
+
+If you already want to turn off your DB container you can do the next command.
+    * docker-compose down
