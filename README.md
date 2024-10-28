@@ -58,6 +58,15 @@ To start colima on future occasions we would simply pass the command as follows:
 To stop colima we do it in the following way:
 * colima stop
 
+## Configure your file .env to access to your local postgreSQL
+
+Configure only the variables DB_NAME, USERNAME and PASSWORD. Host and Port are not necessary to be modified.
+
+    DB_NAME=name_of_your_database
+    USERNAME=your_user
+    PASSWORD=your_password
+    HOST=host.docker.internal
+    PORT=5432
 
 ## Usage with Docker-compose
 
